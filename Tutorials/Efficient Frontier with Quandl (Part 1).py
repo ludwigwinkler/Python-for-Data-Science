@@ -1,20 +1,26 @@
 # import needed modules
 import quandl
 import pandas as pd
+from pandas_datareader import data as pd_data
 import numpy as np
 import matplotlib.pyplot as plt
 
 # get adjusted closing prices of 5 selected companies with Quandl
-quandl.ApiConfig.api_key = 'zcfJ6696mcZScjzsyeta'
-selected = ['CNP', 'F', 'WMT', 'GE', 'TSLA']
-data = quandl.get_table('WIKI/PRICES', ticker = selected,
-                        qopts = { 'columns': ['date', 'ticker', 'adj_close'] },
-                        date = { 'gte': '2014-1-1', 'lte': '2016-12-31' }, paginate=True)
+# quandl.ApiConfig.api_key = 'zcfJ6696mcZScjzsyeta'
+selected = ['CNP', 'WMT', 'GE', 'TSLA']
+start = '2014-01-01'
+end = '2019-12-31'
+# data = quandl.get_table('WIKI/PRICES', ticker = selected,
+#                         qopts = { 'columns': ['date', 'ticker', 'adj_close'] },
+#                         date = { 'gte': '2014-1-1', 'lte': '2016-12-31' }, paginate=True)
+
+
+table = pd_data.DataReader(selected, 'yahoo', start=start, end=end)['Adj Close']
 
 # reorganise data pulled by setting date as index with
 # columns of tickers and their corresponding adjusted prices
-clean = data.set_index('date')
-table = clean.pivot(columns='ticker')
+# clean = data.set_index('date')
+# table = clean.pivot(columns='ticker')
 
 # calculate daily and annual returns of the stocks
 returns_daily = table.pct_change()
@@ -23,6 +29,9 @@ returns_annual = returns_daily.mean() * 250
 # get daily and covariance of returns of the stock
 cov_daily = returns_daily.cov()
 cov_annual = cov_daily * 250
+
+print(returns_annual)
+print(cov_annual)
 
 # empty lists to store returns, volatility and weights of imiginary portfolios
 port_returns = []
